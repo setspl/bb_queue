@@ -31,8 +31,9 @@ class ServiceProvider implements ServiceProviderInterface
         $pimple[Failed\DatabaseFailedJobProvider::class]  = fn($pimple) => new Failed\DatabaseFailedJobProvider($pimple['db']);
         $pimple[Failed\FailedJobProviderInterface::class] = $pimple[Failed\DatabaseFailedJobProvider::class];
 
-        $pimple[HookHandlers\JobsHookHandler::class]    = fn($pimple) => new HookHandlers\JobsHookHandler($pimple[Failed\FailedJobProviderInterface::class]);
-        $pimple[HookHandlers\LoggingHookHandler::class] = fn() => new HookHandlers\LoggingHookHandler();
+        $pimple['addons.bb_queue.queue_jobs_hook_handler'] = fn($pimple) => new HookHandlers\JobsHookHandler($pimple[Failed\FailedJobProviderInterface::class]);
+
+        $pimple['addons.bb_queue.save_log_hook_handler'] = fn() => new HookHandlers\LoggingHookHandler();
 
         $pimple[CallQueuedHandler::class] = $pimple->factory(fn($pimple) => new CallQueuedHandler(
             $pimple[Dispatcher::class],

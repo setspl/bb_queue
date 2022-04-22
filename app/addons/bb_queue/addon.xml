@@ -20,7 +20,7 @@
 
     <compatibility>
         <core_version>
-            <min>4.15.1</min>
+            <min>4.14.1</min>
         </core_version>
         <php_version>
             <min>7.4.0</min>

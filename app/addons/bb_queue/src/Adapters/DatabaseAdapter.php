@@ -67,15 +67,18 @@ class DatabaseAdapter extends Adapter implements AdapterInterface
     {
         $queue = $this->getQueue($queue);
 
-        return $this->database->transaction(function () use ($queue) {
+        //return $this->database->transaction(function () use ($queue) {
+        return $this->transaction(function () use ($queue) {
             if ($job = $this->getNextAvailableJob($queue)) {
                 return $this->marshalJob($queue, $job);
             }
-
             return null;
         });
     }
 
+    private function transaction($fn) {
+        return $fn();
+    }
     /**
      * @inheritDoc
      * @throws InvalidPayloadException
@@ -228,7 +231,8 @@ class DatabaseAdapter extends Adapter implements AdapterInterface
      */
     public function deleteAndRelease(string $queue, DatabaseJob $job, int $delay)
     {
-        $this->database->transaction(function () use ($queue, $job, $delay) {
+        //$this->database->transaction(function () use ($queue, $job, $delay) {
+        $this->transaction(function () use ($queue, $job, $delay) {
             db_query("DELETE FROM ?:jobs WHERE id = ?i", $job->getJobId());
             $this->release($queue, $job->getJobRecord(), $delay);
         });
@@ -261,7 +265,8 @@ class DatabaseAdapter extends Adapter implements AdapterInterface
      */
     public function deleteReserved($queue, string $id)
     {
-        $this->database->transaction(function () use ($id) {
+        //$this->database->transaction(function () use ($id) {
+        $this->transaction(function () use ($id) {
             db_query("DELETE FROM ?:jobs WHERE id = ?i", $id);
         });
     }

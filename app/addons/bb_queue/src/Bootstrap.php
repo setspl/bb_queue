@@ -30,7 +30,7 @@ class Bootstrap implements BootstrapInterface, HookHandlerProviderInterface
              * Custom save log hook handler in case you want to suppress root signing logs.
              */
             'save_log' => [
-                HookHandlers\LoggingHookHandler::class,
+                'addons.bb_queue.save_log_hook_handler',
                 'onSaveLog',
             ],
 
@@ -38,7 +38,7 @@ class Bootstrap implements BootstrapInterface, HookHandlerProviderInterface
              * Core job exception handler entry.
              */
             'queue_job_exception_occurred' => [
-                HookHandlers\JobsHookHandler::class,
+                'addons.bb_queue.queue_jobs_hook_handler',
                 'onJobException'
             ],
         ];

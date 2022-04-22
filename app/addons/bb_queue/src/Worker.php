@@ -96,7 +96,6 @@ class Worker
         while (true) {
             if (!$this->daemonShouldRun()) {
                 $status = $this->pauseWorker($options, $last_restart);
-
                 if (!is_null($status)) {
                     return $this->stop($status);
                 }
