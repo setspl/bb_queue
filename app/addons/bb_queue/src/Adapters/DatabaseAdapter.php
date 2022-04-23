@@ -12,6 +12,7 @@ use Tygh\Exceptions\DatabaseException;
 
 class DatabaseAdapter extends Adapter implements AdapterInterface
 {
+    use ManagesTransactions;
     /**
      * The database connection instance.
      *
@@ -66,19 +67,19 @@ class DatabaseAdapter extends Adapter implements AdapterInterface
     public function pop(?string $queue = null): ?Job
     {
         $queue = $this->getQueue($queue);
-
         //return $this->database->transaction(function () use ($queue) {
-        return $this->transaction(function () use ($queue) {
+        $out = $this->transaction(function () use ($queue) {
             if ($job = $this->getNextAvailableJob($queue)) {
                 return $this->marshalJob($queue, $job);
             }
             return null;
         });
+        return $out;
     }
 
-    private function transaction($fn) {
+ /*   private function transaction($fn) {
         return $fn();
-    }
+    }*/
     /**
      * @inheritDoc
      * @throws InvalidPayloadException

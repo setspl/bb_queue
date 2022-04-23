@@ -163,6 +163,7 @@ class Worker
                 return $job;
             }
         } catch (Throwable $e) {
+            printf("E: %s(%s) %s \n", __METHOD__, __LINE__, $e->getMessage());
             $this->sleep(1);
         }
 
