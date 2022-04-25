@@ -36,7 +36,7 @@ abstract class Adapter implements AdapterInterface
     /**
      * @inheritdoc
      */
-    public function laterOn(string $queue, $delay, string $job, $data = '')
+    public function laterOn(string $queue, $delay, $job, $data = '')
     {
         return $this->later($delay, $job, $data, $queue);
     }

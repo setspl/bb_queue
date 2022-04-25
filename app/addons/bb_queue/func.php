@@ -52,9 +52,9 @@ if (!function_exists('class_uses_recursive')) {
  *
  * @throws DeveloperException
  */
-function fn_queue_dispatch($command): void
+function fn_queue_dispatch($command): int
 {
-    Dispatcher::dispatch($command);
+    return Dispatcher::dispatch($command);
 }
 
 /**

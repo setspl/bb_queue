@@ -53,6 +53,7 @@ $schema = [
             'high',
             'default',
             'low',
+            'product-recalcs',
         ],
     ],
 

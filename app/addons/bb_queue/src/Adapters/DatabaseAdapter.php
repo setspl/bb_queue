@@ -7,12 +7,14 @@ use Tygh\Addons\Queue\InvalidPayloadException;
 use Tygh\Addons\Queue\Jobs\DatabaseJob;
 use Tygh\Addons\Queue\Jobs\Job;
 use Tygh\Addons\Queue\Jobs\JobRecord;
+use Tygh\Addons\Queue\MustBeUniqueInQueue;
 use Tygh\Database\Connection;
 use Tygh\Exceptions\DatabaseException;
 
 class DatabaseAdapter extends Adapter implements AdapterInterface
 {
     use ManagesTransactions;
+    use DetectsConcurrencyErrors;
     /**
      * The database connection instance.
      *
@@ -34,6 +36,7 @@ class DatabaseAdapter extends Adapter implements AdapterInterface
      */
     protected ?int $retry_after = 60;
 
+    public $payloadSha1 = '';
     /**
      * @param Connection $database
      * @param string     $default
@@ -106,7 +109,21 @@ class DatabaseAdapter extends Adapter implements AdapterInterface
      */
     public function later($delay, $job, $data = '', ?string $queue = null)
     {
-        return $this->pushToDatabase($queue, $this->createPayload($job, $data), $delay);
+        $push = true;
+        $payload = $this->createPayload($job, $data);
+        $this->payloadSha1 = sha1($payload);
+        if( $job instanceof MustBeUniqueInQueue) {
+
+            $id = db_get_field("select id from ?:jobs where payload_sha1=?s", $this->payloadSha1);
+            if($id) {
+                $push = false;
+            }
+        }
+        $out = 0;
+        if($push) {
+            $out = $this->pushToDatabase($queue, $payload, $delay);
+        }
+        return $out;
     }
 
     /**
@@ -122,10 +139,13 @@ class DatabaseAdapter extends Adapter implements AdapterInterface
      */
     protected function pushToDatabase(?string $queue, string $payload, $delay = 0, int $attempts = 0): int
     {
-        return (int)$this->database->query(
-            'INSERT INTO ?:jobs ?e',
-            $this->buildDatabaseData($this->getQueue($queue), $payload, $this->availableAt($delay), $attempts)
-        );
+        return
+            $this->transaction(function () use ($queue, $payload, $delay, $attempts) {
+                return (int)$this->database->query(
+                    'INSERT INTO ?:jobs ?e',
+                    $this->buildDatabaseData($this->getQueue($queue), $payload, $this->availableAt($delay), $attempts)
+                );
+            });
     }
 
     /**
@@ -147,6 +167,7 @@ class DatabaseAdapter extends Adapter implements AdapterInterface
             'available_at' => $available_at,
             'created_at'   => $this->currentTime(),
             'payload'      => $payload,
+            'payload_sha1' => sha1($payload),
         ];
     }
 

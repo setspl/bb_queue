@@ -17,9 +17,9 @@ class Dispatcher
      *
      * @throws \Tygh\Exceptions\DeveloperException
      */
-    public static function dispatch($command): void
+    public static function dispatch($command): int
     {
-        Tygh::$app[\Tygh\Addons\Queue\Dispatcher::class]->dispatch($command);
+        return Tygh::$app[\Tygh\Addons\Queue\Dispatcher::class]->dispatch($command);
     }
 
     /**
