@@ -24,6 +24,7 @@ trait ManagesTransactions
     public function transaction(Closure $callback, $attempts = 1)
     {
         for ($currentAttempt = 1; $currentAttempt <= $attempts; $currentAttempt++) {
+            db_query("set autocommit=0");
             $this->beginTransaction();
 
             // We'll simply execute the given callback within a try / catch block and if we
@@ -58,6 +59,7 @@ trait ManagesTransactions
 
                 continue;
             }
+            db_query("set autocommit=1");
             return $callbackResult;
         }
     }
